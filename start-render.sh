@@ -24,6 +24,8 @@ until php artisan migrate --force; do
   sleep "$RETRY_DELAY"
 done
 
-php artisan optimize
+# Avoid failing startup on view cache path issues in container runtime.
+php artisan config:cache
+php artisan route:cache
 
 exec php artisan serve --host 0.0.0.0 --port "${PORT:-10000}"

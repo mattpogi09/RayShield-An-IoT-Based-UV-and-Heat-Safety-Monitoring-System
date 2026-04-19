@@ -3,8 +3,28 @@ set -eu
 
 cd /var/www/html
 
-if [ -z "${APP_KEY:-}" ]; then
-  php artisan key:generate --force || true
+# Ensure framework cache/session/view directories exist in container runtime.
+mkdir -p \
+  storage/framework/cache/data \
+  storage/framework/sessions \
+  storage/framework/views \
+  storage/logs \
+  bootstrap/cache
+
+# Guarantee APP_KEY is valid for AES-256-CBC even if env has a bad generated value.
+APP_KEY_VALID=$(php -r '
+  $k = getenv("APP_KEY") ?: "";
+  if (str_starts_with($k, "base64:")) {
+    $decoded = base64_decode(substr($k, 7), true);
+    echo ($decoded !== false && (strlen($decoded) === 16 || strlen($decoded) === 32)) ? "1" : "0";
+  } else {
+    echo (strlen($k) === 16 || strlen($k) === 32) ? "1" : "0";
+  }
+');
+
+if [ "${APP_KEY_VALID}" != "1" ]; then
+  export APP_KEY="base64:$(php -r 'echo base64_encode(random_bytes(32));')"
+  echo "APP_KEY was missing/invalid. Generated runtime key."
 fi
 
 # Render Postgres can take a bit to become reachable on first deploy.

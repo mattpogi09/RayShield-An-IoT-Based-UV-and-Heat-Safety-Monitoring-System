@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function PhilippineClock() {
+export default function PhilippineClock({ isNightMode = true }) {
     const [time, setTime] = useState(new Date());
 
     useEffect(() => {
@@ -27,8 +27,8 @@ export default function PhilippineClock() {
 
     return (
         <div className="text-right">
-            <p className="text-xs text-gray-400">{dateStr}</p>
-            <p className="text-xl font-bold text-white tracking-wider font-mono">{timeStr}</p>
+            <p className={`text-xs ${isNightMode ? 'text-gray-400' : 'text-slate-500'}`}>{dateStr}</p>
+            <p className={`text-xl font-bold tracking-wider font-mono ${isNightMode ? 'text-white' : 'text-slate-800'}`}>{timeStr}</p>
         </div>
     );
 }

@@ -1,4 +1,4 @@
-export default function SafetyTips() {
+export default function SafetyTips({ isNightMode }) {
     const dos = [
         'Apply SPF 30+ sunscreen every 2 hours',
         'Wear wrap-around sunglasses (UV400)',
@@ -18,7 +18,7 @@ export default function SafetyTips() {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Do's */}
-            <div className="rounded-2xl border border-green-500/20 bg-gradient-to-br from-[#151a3d]/80 to-[#1a1f4e]/80 backdrop-blur-sm p-6 relative overflow-hidden">
+            <div className={`rounded-2xl border p-6 relative overflow-hidden ${isNightMode ? 'border-green-500/20 bg-gradient-to-br from-[#151a3d]/80 to-[#1a1f4e]/80 backdrop-blur-sm' : 'border-green-200 bg-white/90 shadow-md'}`}>
                 {/* Background icon */}
                 <div className="absolute top-4 right-4 opacity-20">
                     <svg className="w-16 h-16 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -33,7 +33,7 @@ export default function SafetyTips() {
 
                 <ul className="space-y-3">
                     {dos.map((item, i) => (
-                        <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                        <li key={i} className={`flex items-start gap-3 text-sm ${isNightMode ? 'text-gray-300' : 'text-slate-700'}`}>
                             <svg className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                             </svg>
@@ -44,7 +44,7 @@ export default function SafetyTips() {
             </div>
 
             {/* Don'ts */}
-            <div className="rounded-2xl border border-red-500/20 bg-gradient-to-br from-[#151a3d]/80 to-[#1a1f4e]/80 backdrop-blur-sm p-6 relative overflow-hidden">
+            <div className={`rounded-2xl border p-6 relative overflow-hidden ${isNightMode ? 'border-red-500/20 bg-gradient-to-br from-[#151a3d]/80 to-[#1a1f4e]/80 backdrop-blur-sm' : 'border-red-200 bg-white/90 shadow-md'}`}>
                 {/* Background icon */}
                 <div className="absolute top-4 right-4 opacity-20">
                     <svg className="w-16 h-16 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,7 +59,7 @@ export default function SafetyTips() {
 
                 <ul className="space-y-3">
                     {donts.map((item, i) => (
-                        <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                        <li key={i} className={`flex items-start gap-3 text-sm ${isNightMode ? 'text-gray-300' : 'text-slate-700'}`}>
                             <svg className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
                             </svg>

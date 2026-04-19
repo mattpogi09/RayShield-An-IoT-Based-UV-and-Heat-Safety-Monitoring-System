@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('user_settings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->boolean('auto_night_mode')->default(true);
+            $table->boolean('auto_night_mode')->default(false);
+            $table->boolean('manual_night_mode')->default(false);
             $table->string('temperature_unit')->default('celsius'); // celsius or fahrenheit
             $table->timestamps();
         });

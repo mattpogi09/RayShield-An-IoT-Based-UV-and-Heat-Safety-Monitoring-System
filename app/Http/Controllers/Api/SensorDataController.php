@@ -27,6 +27,9 @@ class SensorDataController extends Controller
 
         $reading = SensorReading::create($validated);
 
+        // Clear the cache so the latest reading is immediately available
+        cache()->forget('sensor:latest');
+
         return response()->json([
             'message' => 'Sensor data stored successfully',
             'data'    => $reading,
@@ -37,9 +40,19 @@ class SensorDataController extends Controller
      * Get latest sensor reading.
      * GET /api/sensor-data/latest
      */
-    public function latest()
+    public function latest(Request $request)
     {
-        $reading = SensorReading::latest()->first();
+        $forceFresh = $request->boolean('fresh');
+
+        // Use uncached read for manual "Reload" checks, cached read for normal polling.
+        if ($forceFresh) {
+            $reading = SensorReading::latest()->first();
+        } else {
+            // Cache for 1 second to reduce database load during frequent polling
+            $reading = cache()->remember('sensor:latest', 1, function () {
+                return SensorReading::latest()->first();
+            });
+        }
 
         if (!$reading) {
             // Return mock/default data when no readings exist
@@ -55,10 +68,25 @@ class SensorDataController extends Controller
                     'uvb'            => 0,
                     'created_at'     => now()->toISOString(),
                 ],
+                'sensor_status' => [
+                    'sht40_connected' => false,
+                    'veml6075_connected' => false,
+                    'data_stale' => true,
+                ],
             ]);
         }
 
-        return response()->json(['data' => $reading]);
+        $isStale = $reading->created_at->lt(now()->subSeconds(20));
+
+        return response()->json([
+            'data' => $reading,
+            'sensor_status' => [
+                // A sensor is considered connected only when values are valid and data is fresh.
+                'sht40_connected' => !$isStale && $reading->temperature_c > -900 && $reading->humidity > -900,
+                'veml6075_connected' => !$isStale && $reading->uv_index > -900 && $reading->uva > -900 && $reading->uvb > -900,
+                'data_stale' => $isStale,
+            ],
+        ]);
     }
 
     /**

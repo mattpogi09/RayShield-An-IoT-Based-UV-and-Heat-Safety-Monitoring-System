@@ -9,13 +9,14 @@ import json
 import requests
 import time
 import sys
+import os
 from datetime import datetime
 
 # Configuration
 SERIAL_PORT = "COM3"  # Change if your ESP32 is on different COM port
 BAUD_RATE = 115200
-API_URL = "http://127.0.0.1:8000/api/sensor-data"
-API_KEY = "rayshield-secret-key-2026"
+API_URL = os.getenv("RAYSHIELD_API_URL", "http://127.0.0.1:8000/api/sensor-data")
+API_KEY = os.getenv("RAYSHIELD_API_KEY", "rayshield-secret-key-2026")
 TIMEOUT = 5
 
 def read_sensor_data_from_serial(ser):

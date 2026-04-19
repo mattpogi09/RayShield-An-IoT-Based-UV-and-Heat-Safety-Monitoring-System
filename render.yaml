@@ -1,0 +1,68 @@
+services:
+  - type: web
+    name: rayshield-web
+    runtime: php
+    plan: free
+    rootDir: .
+    buildCommand: |
+      composer install --no-dev --optimize-autoloader
+      npm ci
+      npm run build
+      php artisan config:clear
+      php artisan cache:clear
+    preDeployCommand: |
+      php artisan key:generate --force
+      php artisan migrate --force
+      php artisan optimize
+    startCommand: php artisan serve --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: APP_NAME
+        value: RayShield
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: false
+      - key: APP_URL
+        value: https://rayshield-web.onrender.com
+      - key: APP_KEY
+        generateValue: true
+      - key: LOG_CHANNEL
+        value: stack
+      - key: LOG_LEVEL
+        value: info
+      - key: SESSION_DRIVER
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: rayshield-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: rayshield-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: rayshield-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: rayshield-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: rayshield-db
+          property: password
+      - key: RAYSHIELD_API_KEY
+        sync: false
+
+databases:
+  - name: rayshield-db
+    plan: free
+    databaseName: rayshield
+    user: rayshield

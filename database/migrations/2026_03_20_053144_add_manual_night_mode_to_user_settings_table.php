@@ -11,8 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasTable('user_settings')) {
+            return;
+        }
+
         Schema::table('user_settings', function (Blueprint $table) {
-            $table->boolean('manual_night_mode')->default(false)->after('auto_night_mode');
+            if (!Schema::hasColumn('user_settings', 'manual_night_mode')) {
+                $table->boolean('manual_night_mode')->default(false)->after('auto_night_mode');
+            }
 
             // Change auto_night_mode default to false (manual mode by default)
             $table->boolean('auto_night_mode')->default(false)->change();
@@ -24,8 +30,14 @@ return new class extends Migration
      */
     public function down(): void
     {
+        if (!Schema::hasTable('user_settings')) {
+            return;
+        }
+
         Schema::table('user_settings', function (Blueprint $table) {
-            $table->dropColumn('manual_night_mode');
+            if (Schema::hasColumn('user_settings', 'manual_night_mode')) {
+                $table->dropColumn('manual_night_mode');
+            }
 
             // Revert auto_night_mode default back to true
             $table->boolean('auto_night_mode')->default(true)->change();

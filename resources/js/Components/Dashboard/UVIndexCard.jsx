@@ -115,11 +115,7 @@ export default function UVIndexCard({ uvIndex, isNightMode, onClickDetail }) {
     const circumference = 2 * Math.PI * 80;
     const offset = circumference - (percentage / 100) * circumference;
 
-    const trendText = trend === 'rising'
-        ? 'Rising'
-        : trend === 'falling'
-            ? 'Falling'
-            : 'Stable';
+    const uvStatus = level.label;
 
     const containerClass = isNightMode
         ? `border ${level.border} bg-gradient-to-br ${level.bg} shadow-lg backdrop-blur-sm`
@@ -149,7 +145,7 @@ export default function UVIndexCard({ uvIndex, isNightMode, onClickDetail }) {
                         d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
                 <h2 className={`font-semibold text-lg ${titleClass}`}>Ultraviolet Index</h2>
-                <span className={`ml-auto rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-all duration-500 ${trendTextClass} ${isNightMode ? level.chip : level.lightChip}`}>{trendText}</span>
+                <span className={`ml-auto rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-all duration-500 ${trendTextClass} ${isNightMode ? level.chip : level.lightChip}`}>{uvStatus}</span>
             </div>
 
             <div className="flex items-center justify-around">

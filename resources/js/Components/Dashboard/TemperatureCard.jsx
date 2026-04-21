@@ -170,52 +170,30 @@ export default function TemperatureCard({ temperature, unit, heatIndex, isNightM
 
     const palette = getPalette();
 
-    const trendText = trend === 'rising'
-        ? 'Rising'
-        : trend === 'falling'
-            ? 'Cooling'
-            : 'Stable';
+    const temperatureStatus = tempC >= 40
+        ? 'Danger'
+        : tempC >= 35
+            ? 'High'
+            : tempC >= 30
+                ? 'Warm'
+                : tempC >= 25
+                    ? 'Normal'
+                    : 'Cool';
 
-    const getTrendChipClass = () => {
+    const getStatusChipClass = () => {
         if (!isNightMode) {
             if (tempC >= 40) return 'bg-red-100 border-red-300 text-red-700';
-            if (trend === 'stable') {
-                return tempC >= 30
-                    ? 'bg-cyan-100 border-cyan-300 text-cyan-700'
-                    : 'bg-emerald-100 border-emerald-300 text-emerald-700';
-            }
-            if (trend === 'rising') {
-                return tempC >= 35
-                    ? 'bg-orange-100 border-orange-300 text-orange-700'
-                    : 'bg-yellow-100 border-yellow-300 text-yellow-700';
-            }
-            return tempC >= 35
-                ? 'bg-amber-100 border-amber-300 text-amber-700'
-                : 'bg-emerald-100 border-emerald-300 text-emerald-700';
+            if (tempC >= 35) return 'bg-orange-100 border-orange-300 text-orange-700';
+            if (tempC >= 30) return 'bg-yellow-100 border-yellow-300 text-yellow-700';
+            if (tempC >= 25) return 'bg-emerald-100 border-emerald-300 text-emerald-700';
+            return 'bg-sky-100 border-sky-300 text-sky-700';
         }
 
-        if (tempC >= 40) {
-            return trend === 'stable'
-                ? 'bg-red-500/22 border-red-300/35'
-                : 'bg-red-500/28 border-red-300/40';
-        }
-
-        if (trend === 'stable') {
-            return tempC >= 30
-                ? 'bg-cyan-500/20 border-cyan-300/35'
-                : 'bg-emerald-500/20 border-emerald-300/35';
-        }
-
-        if (trend === 'rising') {
-            return tempC >= 35
-                ? 'bg-orange-500/24 border-orange-300/40'
-                : 'bg-yellow-500/22 border-yellow-300/38';
-        }
-
-        // cooling
-        return tempC >= 35
-            ? 'bg-amber-500/22 border-amber-300/35'
-            : 'bg-emerald-500/20 border-emerald-300/35';
+        if (tempC >= 40) return 'bg-red-500/24 border-red-300/40';
+        if (tempC >= 35) return 'bg-orange-500/24 border-orange-300/40';
+        if (tempC >= 30) return 'bg-yellow-500/22 border-yellow-300/38';
+        if (tempC >= 25) return 'bg-emerald-500/20 border-emerald-300/35';
+        return 'bg-sky-500/20 border-sky-300/35';
     };
 
     const getAdviceChipClass = () => {
@@ -261,7 +239,7 @@ export default function TemperatureCard({ temperature, unit, heatIndex, isNightM
                     <path d="M12 2a3 3 0 00-3 3v8.17a5 5 0 106 0V5a3 3 0 00-3-3zm0 2a1 1 0 011 1v9.59l.41.29a3 3 0 11-2.82 0l.41-.29V5a1 1 0 011-1z"/>
                 </svg>
                 <h3 className={`font-semibold ${titleClass}`}>Temperature</h3>
-                <span className={`ml-auto rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-all duration-500 ${chipTextClass} ${getTrendChipClass()}`}>{trendText}</span>
+                <span className={`ml-auto rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-all duration-500 ${chipTextClass} ${getStatusChipClass()}`}>{temperatureStatus}</span>
             </div>
 
             <div className="flex items-baseline gap-2">

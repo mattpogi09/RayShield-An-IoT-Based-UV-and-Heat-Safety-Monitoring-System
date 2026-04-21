@@ -160,59 +160,26 @@ export default function HumidityCard({ humidity, temperature, isNightMode }) {
     };
 
     const palette = getPalette();
-    const trendText = trend === 'rising'
-        ? 'Rising'
-        : trend === 'falling'
-            ? 'Dropping'
-            : 'Stable';
+    const humidityStatus = humidity >= 80
+        ? 'High'
+        : humidity >= 60
+            ? 'Elevated'
+            : humidity >= 30
+                ? 'Normal'
+                : 'Low';
 
-    const getTrendChipClass = () => {
+    const getStatusChipClass = () => {
         if (!isNightMode) {
-            if (humidity >= 80) {
-                return trend === 'stable'
-                    ? 'bg-red-100 border-red-300 text-red-700'
-                    : 'bg-rose-100 border-rose-300 text-rose-700';
-            }
-
-            if (trend === 'stable') {
-                return humidity >= 60
-                    ? 'bg-cyan-100 border-cyan-300 text-cyan-700'
-                    : 'bg-emerald-100 border-emerald-300 text-emerald-700';
-            }
-
-            if (trend === 'rising') {
-                return humidity >= 60
-                    ? 'bg-yellow-100 border-yellow-300 text-yellow-700'
-                    : 'bg-cyan-100 border-cyan-300 text-cyan-700';
-            }
-
-            return humidity >= 60
-                ? 'bg-emerald-100 border-emerald-300 text-emerald-700'
-                : 'bg-sky-100 border-sky-300 text-sky-700';
+            if (humidity >= 80) return 'bg-red-100 border-red-300 text-red-700';
+            if (humidity >= 60) return 'bg-amber-100 border-amber-300 text-amber-700';
+            if (humidity >= 30) return 'bg-emerald-100 border-emerald-300 text-emerald-700';
+            return 'bg-sky-100 border-sky-300 text-sky-700';
         }
 
-        if (humidity >= 80) {
-            return trend === 'stable'
-                ? 'bg-red-500/22 border-red-300/35'
-                : 'bg-red-500/28 border-red-300/40';
-        }
-
-        if (trend === 'stable') {
-            return humidity >= 60
-                ? 'bg-cyan-500/20 border-cyan-300/35'
-                : 'bg-emerald-500/20 border-emerald-300/35';
-        }
-
-        if (trend === 'rising') {
-            return humidity >= 60
-                ? 'bg-yellow-500/22 border-yellow-300/38'
-                : 'bg-cyan-500/20 border-cyan-300/35';
-        }
-
-        // dropping
-        return humidity >= 60
-            ? 'bg-emerald-500/20 border-emerald-300/35'
-            : 'bg-cyan-500/20 border-cyan-300/35';
+        if (humidity >= 80) return 'bg-red-500/24 border-red-300/40';
+        if (humidity >= 60) return 'bg-amber-500/24 border-amber-300/40';
+        if (humidity >= 30) return 'bg-emerald-500/20 border-emerald-300/35';
+        return 'bg-sky-500/20 border-sky-300/35';
     };
 
     const getAdviceChipClass = () => {
@@ -260,7 +227,7 @@ export default function HumidityCard({ humidity, temperature, isNightMode }) {
                         d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                 </svg>
                 <h3 className={`font-semibold ${titleClass}`}>Humidity</h3>
-                <span className={`ml-auto rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-all duration-500 ${chipTextClass} ${getTrendChipClass()}`}>{trendText}</span>
+                <span className={`ml-auto rounded-full border px-2 py-0.5 text-[11px] font-semibold transition-all duration-500 ${chipTextClass} ${getStatusChipClass()}`}>{humidityStatus}</span>
             </div>
 
             <div className="flex items-baseline gap-2">

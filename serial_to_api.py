@@ -19,7 +19,9 @@ SERIAL_PORT = os.getenv("RAYSHIELD_SERIAL_PORT", "").strip()
 BAUD_RATE = 115200
 API_URL = os.getenv("RAYSHIELD_API_URL", "http://127.0.0.1:8000/api/sensor-data")
 API_KEY = os.getenv("RAYSHIELD_API_KEY", "rayshield-secret-key-2026")
-TIMEOUT = 5
+TIMEOUT = int(os.getenv("RAYSHIELD_API_TIMEOUT", "20"))
+MAX_RETRIES = int(os.getenv("RAYSHIELD_API_RETRIES", "3"))
+RETRY_DELAY_SECONDS = float(os.getenv("RAYSHIELD_API_RETRY_DELAY", "1.5"))
 
 
 def normalize_api_url(url):
@@ -87,57 +89,75 @@ def print_available_ports():
 
 def read_sensor_data_from_serial(ser):
     """Read and parse sensor data from ESP32 serial output"""
-    buffer = ""
-    
     while True:
         try:
             if ser.in_waiting > 0:
-                char = ser.read().decode('utf-8', errors='ignore')
-                buffer += char
-                
-                # Look for complete JSON sensor data (ends with "}")
-                if "RAYSHIELD_SENSOR_DATA:" in buffer and "}" in buffer:
-                    # Extract JSON part
-                    start = buffer.find("{")
-                    end = buffer.find("}") + 1
-                    
-                    if start != -1 and end > start:
-                        json_str = buffer[start:end]
-                        buffer = buffer[end:]  # Keep remaining buffer for next data
-                        
-                        try:
-                            data = json.loads(json_str)
-                            return data
-                        except json.JSONDecodeError:
-                            print(f"Failed to parse JSON: {json_str}")
-                            continue
+                line = ser.readline().decode('utf-8', errors='ignore').strip()
+                if not line:
+                    continue
+
+                # Show important diagnostics from ESP32 logs in the bridge terminal.
+                if line.startswith("ESP32 Die:"):
+                    print(f"  {line}")
+                    continue
+
+                # Parse sensor payload line used for API posting.
+                if line.startswith("RAYSHIELD_SENSOR_DATA:"):
+                    json_str = line.split("RAYSHIELD_SENSOR_DATA:", 1)[1].strip()
+                    try:
+                        data = json.loads(json_str)
+                        return data
+                    except json.JSONDecodeError:
+                        print(f"Failed to parse JSON: {json_str}")
+                        continue
         except Exception as e:
             print(f"Error reading serial: {e}")
             continue
 
 def post_to_api(data):
     """Post sensor data to Laravel API"""
-    try:
-        headers = {
-            "X-API-KEY": API_KEY,
-            "Content-Type": "application/json"
-        }
-        
-        response = requests.post(API_URL, json=data, headers=headers, timeout=TIMEOUT)
-        
-        if response.status_code in [200, 201]:
-            print(f"✓ Posted successfully (HTTP {response.status_code})")
-            return True
-        else:
+    headers = {
+        "X-API-KEY": API_KEY,
+        "Content-Type": "application/json"
+    }
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        try:
+            response = requests.post(API_URL, json=data, headers=headers, timeout=TIMEOUT)
+
+            if response.status_code in [200, 201]:
+                print(f"✓ Posted successfully (HTTP {response.status_code})")
+                return True
+
             print(f"✗ Post failed (HTTP {response.status_code}): {response.text}")
             return False
-            
-    except requests.exceptions.ConnectionError:
-        print(f"✗ Connection error - API not reachable at {API_URL}")
-        return False
-    except Exception as e:
-        print(f"✗ Error posting data: {e}")
-        return False
+
+        except requests.exceptions.ReadTimeout:
+            if attempt < MAX_RETRIES:
+                print(
+                    f"… API timeout on attempt {attempt}/{MAX_RETRIES} "
+                    f"(Render may be waking up). Retrying in {RETRY_DELAY_SECONDS:.1f}s..."
+                )
+                time.sleep(RETRY_DELAY_SECONDS)
+                continue
+            print(
+                f"✗ API read timeout after {MAX_RETRIES} attempts "
+                f"(timeout={TIMEOUT}s)."
+            )
+            return False
+        except requests.exceptions.ConnectionError:
+            if attempt < MAX_RETRIES:
+                print(
+                    f"… Connection error on attempt {attempt}/{MAX_RETRIES}. "
+                    f"Retrying in {RETRY_DELAY_SECONDS:.1f}s..."
+                )
+                time.sleep(RETRY_DELAY_SECONDS)
+                continue
+            print(f"✗ Connection error - API not reachable at {API_URL}")
+            return False
+        except Exception as e:
+            print(f"✗ Error posting data: {e}")
+            return False
 
 def main():
     selected_port = resolve_serial_port()
@@ -150,6 +170,7 @@ def main():
     else:
         print(f"Serial port: {selected_port or 'Not found'} (auto-detected)")
     print(f"API URL:     {API_URL}")
+    print(f"API timeout: {TIMEOUT}s, retries: {MAX_RETRIES}")
 
     if not selected_port:
         print("\nESP32 serial port could not be auto-detected.")

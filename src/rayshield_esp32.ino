@@ -10,7 +10,7 @@
 const bool BRIDGE_MODE = true;
 
 const char* ssid      = "Wifi_Fevers";
-const char* password  = "123456788999";
+const char* password  = "123456789";
 
 // ── VEML6075: use the default Wire object (GPIO21=SDA, GPIO22=SCL) ──
 // ── SHT40:    use a second bus   (GPIO18=SDA, GPIO19=SCL)          ──
@@ -67,6 +67,19 @@ float clampf(float v, float lo, float hi) {
 
 float applyEma(float prev, float current, float alpha) {
   return (alpha * current) + ((1.0f - alpha) * prev);
+}
+
+float readInternalTempC() {
+#if defined(ESP32)
+  // Die temperature is useful for diagnostics but is not ambient air temperature.
+  float t = temperatureRead();
+  if (isnan(t) || t < -40.0f || t > 125.0f) {
+    return NAN;
+  }
+  return t;
+#else
+  return NAN;
+#endif
 }
 
 const char* wifiStatusText(wl_status_t status) {
@@ -322,6 +335,14 @@ void loop() {
   } else {
     Serial.println("UV Sensor: OFFLINE");
   }
+
+  float mcuTempC = readInternalTempC();
+  if (!isnan(mcuTempC)) {
+    Serial.printf("ESP32 Die:   %.1f C / %.1f F\n", mcuTempC, celsiusToFahrenheit(mcuTempC));
+  } else {
+    Serial.println("ESP32 Die:   N/A");
+  }
+
   Serial.println("--------------------------------\n");
 
   // Output sensor data as JSON for Python serial reader

@@ -5,12 +5,12 @@
 #include <Adafruit_SHT4x.h>
 #include <Adafruit_VEML6075.h>
 
+// Set to true when using USB serial bridge (serial_to_api.py) to post data.
+// In this mode, ESP32 does not require Wi-Fi or server host settings.
+const bool BRIDGE_MODE = true;
+
 const char* ssid      = "Wifi_Fevers";
 const char* password  = "123456788999";
-const char* serverHost = "10.17.20.75";
-const uint16_t serverPort = 8000;
-const char* serverPath = "/api/sensor-data";
-const char* apiKey    = "rayshield-secret-key-2026";
 
 // ── VEML6075: use the default Wire object (GPIO21=SDA, GPIO22=SCL) ──
 // ── SHT40:    use a second bus   (GPIO18=SDA, GPIO19=SCL)          ──
@@ -214,7 +214,12 @@ void setup() {
   Serial.printf("VEML6075: %s\n", veml6075Available ? "Online" : "OFFLINE");
   Serial.println("---------------------\n");
 
-  connectWiFi();
+  if (!BRIDGE_MODE) {
+    connectWiFi();
+  } else {
+    Serial.println("Bridge mode enabled: WiFi posting is disabled.");
+    Serial.println("Run serial_to_api.py on your laptop to forward readings to the cloud API.");
+  }
   Serial.println("\nRayShield ESP32 ready!\n");
 }
 
@@ -333,7 +338,7 @@ void loop() {
   sensorJson += "}";
   Serial.println(sensorJson);
 
-  if (WiFi.status() != WL_CONNECTED) {
+  if (!BRIDGE_MODE && WiFi.status() != WL_CONNECTED) {
     Serial.println("WiFi disconnected. Reconnecting...");
     connectWiFi();
     return;

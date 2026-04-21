@@ -5,19 +5,85 @@ Reads sensor data from ESP32 via USB serial and posts to Laravel API
 """
 
 import serial
+from serial.tools import list_ports
 import json
 import requests
 import time
 import sys
 import os
 from datetime import datetime
+from urllib.parse import urlparse
 
 # Configuration
-SERIAL_PORT = "COM3"  # Change if your ESP32 is on different COM port
+SERIAL_PORT = os.getenv("RAYSHIELD_SERIAL_PORT", "").strip()
 BAUD_RATE = 115200
 API_URL = os.getenv("RAYSHIELD_API_URL", "http://127.0.0.1:8000/api/sensor-data")
 API_KEY = os.getenv("RAYSHIELD_API_KEY", "rayshield-secret-key-2026")
 TIMEOUT = 5
+
+
+def normalize_api_url(url):
+    """Normalize API URL for hosted deployments."""
+    url = (url or "").strip()
+    if not url:
+        return "http://127.0.0.1:8000/api/sensor-data"
+
+    parsed = urlparse(url)
+
+    # Render serves over HTTPS. Auto-fix common accidental http:// config.
+    if parsed.netloc.endswith("onrender.com") and parsed.scheme == "http":
+        url = "https://" + parsed.netloc + parsed.path
+
+    if not url.endswith("/api/sensor-data"):
+        url = url.rstrip("/") + "/api/sensor-data"
+
+    return url
+
+
+API_URL = normalize_api_url(API_URL)
+
+
+def list_candidate_ports():
+    """Return serial ports sorted with likely ESP32 devices first."""
+    candidates = []
+    for port in list_ports.comports():
+        text = f"{port.device} {port.description} {port.hwid}".lower()
+        score = 0
+
+        # Common ESP32 USB-UART chip hints.
+        if any(k in text for k in ["cp210", "ch340", "ch910", "ftdi", "usb serial", "uart", "wch", "silicon labs"]):
+            score += 10
+
+        if "bluetooth" in text:
+            score -= 5
+
+        candidates.append((score, port))
+
+    candidates.sort(key=lambda item: item[0], reverse=True)
+    return [p for _, p in candidates]
+
+
+def resolve_serial_port():
+    """Resolve serial port from env override or auto-detect."""
+    if SERIAL_PORT:
+        return SERIAL_PORT
+
+    ports = list_candidate_ports()
+    if not ports:
+        return None
+
+    return ports[0].device
+
+
+def print_available_ports():
+    ports = list_ports.comports()
+    if not ports:
+        print("No serial ports found.")
+        return
+
+    print("Detected serial ports:")
+    for port in ports:
+        print(f"  - {port.device}: {port.description}")
 
 def read_sensor_data_from_serial(ser):
     """Read and parse sensor data from ESP32 serial output"""
@@ -67,21 +133,35 @@ def post_to_api(data):
             return False
             
     except requests.exceptions.ConnectionError:
-        print("✗ Connection error - Laravel server not reachable on 127.0.0.1:8000")
+        print(f"✗ Connection error - API not reachable at {API_URL}")
         return False
     except Exception as e:
         print(f"✗ Error posting data: {e}")
         return False
 
 def main():
+    selected_port = resolve_serial_port()
+
     print("=" * 60)
     print("RayShield Serial to API Bridge")
     print("=" * 60)
-    print(f"Connecting to ESP32 on {SERIAL_PORT}...")
+    if SERIAL_PORT:
+        print(f"Serial port: {selected_port} (manual via RAYSHIELD_SERIAL_PORT)")
+    else:
+        print(f"Serial port: {selected_port or 'Not found'} (auto-detected)")
+    print(f"API URL:     {API_URL}")
+
+    if not selected_port:
+        print("\nESP32 serial port could not be auto-detected.")
+        print("Set RAYSHIELD_SERIAL_PORT manually and try again.")
+        print_available_ports()
+        sys.exit(1)
+
+    print(f"Connecting to ESP32 on {selected_port}...")
     
     ser = None
     try:
-        ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
+        ser = serial.Serial(selected_port, BAUD_RATE, timeout=1)
         print(f"Connected! Reading sensor data...")
         print("-" * 60)
         
@@ -120,11 +200,12 @@ def main():
                 time.sleep(1)
                 
     except serial.SerialException as e:
-        print(f"\nError opening serial port {SERIAL_PORT}: {e}")
+        print(f"\nError opening serial port {selected_port}: {e}")
         print("\nMake sure:")
         print("  1. ESP32 is connected via USB")
-        print("  2. COM port number matches (check Device Manager)")
+        print("  2. COM port is correct (or set RAYSHIELD_SERIAL_PORT)")
         print("  3. No other application is using the COM port (close PlatformIO monitor)")
+        print_available_ports()
         sys.exit(1)
     finally:
         if ser is not None and ser.is_open:

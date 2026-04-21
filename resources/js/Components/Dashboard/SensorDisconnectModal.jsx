@@ -16,8 +16,8 @@ export default function SensorDisconnectModal({ status, onClose, onReload, isRel
     }
 
     return (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center px-4 ${isNightMode ? 'bg-black/60' : 'bg-slate-900/35 backdrop-blur-sm'}`}>
-            <div className={`w-full max-w-lg rounded-2xl p-6 shadow-2xl ${isNightMode ? 'border border-red-400/30 bg-[#111638]' : 'border border-red-200 bg-white'}`}>
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 ${isNightMode ? 'bg-black/60' : 'bg-slate-900/35 backdrop-blur-sm'}`}>
+            <div className={`w-full max-w-lg max-h-[88vh] overflow-y-auto rounded-2xl p-4 sm:p-6 shadow-2xl ${isNightMode ? 'border border-red-400/30 bg-[#111638]' : 'border border-red-200 bg-white'}`}>
                 <div className="mb-4 flex items-start justify-between gap-4">
                     <div>
                         <h2 className={`text-xl font-bold ${isNightMode ? 'text-red-300' : 'text-red-700'}`}>Sensor Connection Alert</h2>

@@ -202,12 +202,12 @@ export default function Dashboard() {
         <>
             <Head title="Dashboard" />
 
-            <div className={`min-h-screen transition-colors duration-700 ${
+            <div className={`min-h-screen overflow-x-hidden transition-colors duration-700 ${
                 isNightMode
                     ? 'bg-gradient-to-br from-[#0a0e27] via-[#111638] to-[#0d1229]'
                     : 'bg-gradient-to-br from-[#f8fbff] via-[#eef4ff] to-[#e8f1ff]'
             }`}>
-                <header className="px-6 py-4 flex items-center justify-between">
+                <header className="px-3 sm:px-6 py-3 sm:py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${isNightMode ? 'border-purple-400/50' : 'border-indigo-300/70 bg-white/80'}`}>
                             <svg className={`w-5 h-5 ${isNightMode ? 'text-purple-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -216,7 +216,7 @@ export default function Dashboard() {
                             </svg>
                         </div>
                         <div>
-                            <h1 className="text-xl font-bold">
+                            <h1 className="text-lg sm:text-xl font-bold">
                                 <span className={isNightMode ? 'text-white' : 'text-slate-800'}>RAY</span>
                                 <span className={isNightMode ? 'text-purple-400' : 'text-indigo-600'}>SHIELD</span>
                             </h1>
@@ -224,7 +224,7 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="relative flex items-center gap-4">
+                    <div className="relative flex w-full items-center justify-between gap-2 md:w-auto md:justify-end md:gap-4">
                         <div className="flex items-center gap-2 self-center">
                             <button
                                 onClick={() => setShowNotificationPanel((prev) => !prev)}
@@ -243,14 +243,15 @@ export default function Dashboard() {
                         {hasSensorIssue && (
                             <button
                                 onClick={() => setShowSensorModal(true)}
-                                className={`h-10 inline-flex items-center gap-2 rounded-lg border px-3 text-xs font-semibold transition-colors ${isNightMode
+                                className={`h-10 inline-flex items-center gap-2 rounded-lg border px-2.5 sm:px-3 text-[11px] sm:text-xs font-semibold transition-colors ${isNightMode
                                     ? 'border-amber-400/40 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20'
                                     : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
                                 }`}
                                 title="Sensor alerts"
                             >
                                 <span className={`inline-block h-2 w-2 rounded-full animate-pulse ${isNightMode ? 'bg-amber-300' : 'bg-amber-500'}`} />
-                                Sensor Warning
+                                <span className="hidden sm:inline">Sensor Warning</span>
+                                <span className="sm:hidden">Warning</span>
                             </button>
                         )}
                         <button
@@ -268,7 +269,7 @@ export default function Dashboard() {
                         <PhilippineClock isNightMode={isNightMode} />
 
                         {showNotificationPanel && (
-                            <div className={`absolute right-0 top-12 z-40 w-[320px] rounded-xl border p-4 shadow-xl ${isNightMode ? 'border-white/15 bg-[#101634]' : 'border-slate-200 bg-white'}`}>
+                            <div className={`absolute right-0 top-12 z-40 w-[min(92vw,320px)] rounded-xl border p-4 shadow-xl ${isNightMode ? 'border-white/15 bg-[#101634]' : 'border-slate-200 bg-white'}`}>
                                 <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isNightMode ? 'text-gray-400' : 'text-slate-500'}`}>UV Notification</p>
                                 <div className={`rounded-lg border px-3 py-2 text-sm ${uvNotification.chip}`}>
                                     <p className="font-semibold">{uvNotification.title}</p>
@@ -280,12 +281,12 @@ export default function Dashboard() {
                 </header>
 
                 {showStatusBanner && (
-                    <div className="px-6 mb-6">
+                    <div className="px-3 sm:px-6 mb-6">
                         <StatusBanner uvIndex={uvIndex} isNightMode={isNightMode} />
                     </div>
                 )}
 
-                <div className="px-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                <div className="px-3 sm:px-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
                     <div className="lg:col-span-2">
                         <UVIndexCard
                             uvIndex={uvIndex}
@@ -308,7 +309,7 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                <div className="px-6 mb-6">
+                <div className="px-3 sm:px-6 mb-6">
                     <HeatIndexCard
                         heatIndexC={sensorData.heat_index_c}
                         heatIndexF={sensorData.heat_index_f}
@@ -321,7 +322,7 @@ export default function Dashboard() {
                     />
                 </div>
 
-                <div className="px-6 pb-8">
+                <div className="px-3 sm:px-6 pb-8">
                     <SafetyTips isNightMode={isNightMode} />
                 </div>
 

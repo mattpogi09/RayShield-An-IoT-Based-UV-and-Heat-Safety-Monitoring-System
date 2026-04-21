@@ -21,14 +21,13 @@ export default function PhilippineClock({ isNightMode = true }) {
         ...options,
         hour: '2-digit',
         minute: '2-digit',
-        second: '2-digit',
         hour12: true,
     });
 
     return (
-        <div className="text-right">
-            <p className={`text-xs ${isNightMode ? 'text-gray-400' : 'text-slate-500'}`}>{dateStr}</p>
-            <p className={`text-xl font-bold tracking-wider font-mono ${isNightMode ? 'text-white' : 'text-slate-800'}`}>{timeStr}</p>
+        <div className="text-right shrink-0">
+            <p className={`hidden text-[11px] sm:block ${isNightMode ? 'text-gray-400' : 'text-slate-500'}`}>{dateStr}</p>
+            <p className={`text-lg sm:text-xl font-bold tracking-wide font-mono whitespace-nowrap ${isNightMode ? 'text-white' : 'text-slate-800'}`}>{timeStr}</p>
         </div>
     );
 }

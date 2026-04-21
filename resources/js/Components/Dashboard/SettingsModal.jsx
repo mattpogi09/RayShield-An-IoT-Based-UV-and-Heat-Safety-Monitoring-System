@@ -15,11 +15,11 @@ export default function SettingsModal({ manualNightMode, temperatureUnit, isNigh
 
     return (
         <div
-            className={`fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm ${isNightMode ? 'bg-black/60' : 'bg-slate-900/35'}`}
+            className={`fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 backdrop-blur-sm ${isNightMode ? 'bg-black/60' : 'bg-slate-900/35'}`}
             onClick={onClose}
         >
             <div
-                className={`w-full max-w-md rounded-2xl p-6 ${isNightMode ? 'bg-[#1a1f4e] border border-white/10' : 'bg-white border border-slate-200 shadow-2xl'}`}
+                className={`w-full max-w-md max-h-[88vh] overflow-y-auto rounded-2xl p-4 sm:p-6 ${isNightMode ? 'bg-[#1a1f4e] border border-white/10' : 'bg-white border border-slate-200 shadow-2xl'}`}
                 onClick={e => e.stopPropagation()}
             >
                 <div className="flex items-center justify-between mb-6">
@@ -54,7 +54,7 @@ export default function SettingsModal({ manualNightMode, temperatureUnit, isNigh
                 {/* Temperature Unit */}
                 <div className="mb-6">
                     <h3 className={`font-semibold text-sm mb-3 ${isNightMode ? 'text-white' : 'text-slate-800'}`}>Temperature Unit</h3>
-                    <div className="flex gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <button
                             onClick={() => setTempUnit('celsius')}
                             className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${

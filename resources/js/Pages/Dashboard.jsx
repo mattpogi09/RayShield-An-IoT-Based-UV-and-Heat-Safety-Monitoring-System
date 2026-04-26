@@ -1,4 +1,4 @@
-import { Head, usePage, router } from '@inertiajs/react';
+import { Head, usePage, router, Link } from '@inertiajs/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import UVIndexCard from '@/Components/Dashboard/UVIndexCard';
 import TemperatureCard from '@/Components/Dashboard/TemperatureCard';
@@ -226,6 +226,21 @@ export default function Dashboard() {
 
                     <div className="relative flex w-full items-center justify-between gap-2 md:w-auto md:justify-end md:gap-4">
                         <div className="flex items-center gap-2 self-center">
+                            {/* History link */}
+                            <Link
+                                href="/history"
+                                className={`h-10 inline-flex items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors ${isNightMode
+                                    ? 'border-white/15 bg-white/5 text-gray-200 hover:bg-white/10'
+                                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                }`}
+                                title="Daily History"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="hidden sm:inline">History</span>
+                            </Link>
+
                             <button
                                 onClick={() => setShowNotificationPanel((prev) => !prev)}
                                 className={`h-10 inline-flex items-center justify-center rounded-lg border px-3 transition-colors ${isNightMode

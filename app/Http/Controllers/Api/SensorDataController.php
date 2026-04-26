@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DailySensorSnapshot;
 use App\Models\SensorReading;
 use Illuminate\Http\Request;
 
@@ -102,5 +103,20 @@ class SensorDataController extends Controller
             ->get();
 
         return response()->json(['data' => $readings]);
+    }
+
+    /**
+     * Get daily end-of-day snapshots.
+     * GET /api/sensor-data/daily-history
+     */
+    public function dailyHistory(Request $request)
+    {
+        $limit = (int) $request->get('limit', 90);
+
+        $snapshots = DailySensorSnapshot::orderBy('snapshot_date', 'desc')
+            ->limit($limit)
+            ->get();
+
+        return response()->json(['data' => $snapshots]);
     }
 }

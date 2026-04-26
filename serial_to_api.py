@@ -22,6 +22,7 @@ API_KEY = os.getenv("RAYSHIELD_API_KEY", "rayshield-secret-key-2026")
 TIMEOUT = int(os.getenv("RAYSHIELD_API_TIMEOUT", "20"))
 MAX_RETRIES = int(os.getenv("RAYSHIELD_API_RETRIES", "3"))
 RETRY_DELAY_SECONDS = float(os.getenv("RAYSHIELD_API_RETRY_DELAY", "1.5"))
+LAST_ESP32_DIE_LINE = "ESP32 Die: N/A (firmware log not seen yet)"
 
 
 def normalize_api_url(url):
@@ -89,6 +90,8 @@ def print_available_ports():
 
 def read_sensor_data_from_serial(ser):
     """Read and parse sensor data from ESP32 serial output"""
+    global LAST_ESP32_DIE_LINE
+
     while True:
         try:
             if ser.in_waiting > 0:
@@ -97,8 +100,10 @@ def read_sensor_data_from_serial(ser):
                     continue
 
                 # Show important diagnostics from ESP32 logs in the bridge terminal.
-                if line.startswith("ESP32 Die:"):
-                    print(f"  {line}")
+                if "ESP32 Die:" in line:
+                    die_line = line[line.find("ESP32 Die:"):]
+                    LAST_ESP32_DIE_LINE = die_line
+                    print(f"  [ESP32] {die_line}")
                     continue
 
                 # Parse sensor payload line used for API posting.
@@ -203,6 +208,7 @@ def main():
                     print(f"  Humidity: {data.get('humidity', 'N/A')}%")
                     print(f"  Heat Index: {data.get('heat_index_c', 'N/A')}°C / {data.get('heat_index_f', 'N/A')}°F")
                     print(f"  UV Index: {data.get('uv_index', 'N/A')}")
+                    print(f"  {LAST_ESP32_DIE_LINE}")
                     
                     print("  Posting to API...", end=" ", flush=True)
                     

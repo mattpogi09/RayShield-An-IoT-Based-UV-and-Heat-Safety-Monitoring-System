@@ -16,3 +16,5 @@ Route::post('/sensor-data', [SensorDataController::class, 'store'])
 // Public endpoints for the dashboard (polling from browser)
 Route::get('/sensor-data/latest', [SensorDataController::class, 'latest']);
 Route::get('/sensor-data/history', [SensorDataController::class, 'history']);
+Route::get('/sensor-data/daily-history', [SensorDataController::class, 'dailyHistory']);
+

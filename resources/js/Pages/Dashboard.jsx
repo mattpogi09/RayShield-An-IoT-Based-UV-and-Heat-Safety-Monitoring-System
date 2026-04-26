@@ -1,4 +1,4 @@
-import { Head, usePage, router, Link } from '@inertiajs/react';
+import { Head, usePage, router } from '@inertiajs/react';
 import { useState, useEffect, useCallback, useRef } from 'react';
 import UVIndexCard from '@/Components/Dashboard/UVIndexCard';
 import TemperatureCard from '@/Components/Dashboard/TemperatureCard';
@@ -11,6 +11,9 @@ import SettingsModal from '@/Components/Dashboard/SettingsModal';
 import SensorDisconnectModal from '@/Components/Dashboard/SensorDisconnectModal';
 import HeatIndexDetailModal from '@/Components/Dashboard/HeatIndexDetailModal';
 import UVDetailModal from '@/Components/Dashboard/UVDetailModal';
+import BurgerMenu from '@/Components/Dashboard/BurgerMenu';
+
+const MAX_LOG_ENTRIES = 100;
 
 export default function Dashboard() {
     const { latestReading, settings, sensorStatus: initialSensorStatus } = usePage().props;
@@ -43,7 +46,11 @@ export default function Dashboard() {
     });
     const [showSensorModal, setShowSensorModal] = useState(initialHasSensorIssue);
     const [isReloadingSensors, setIsReloadingSensors] = useState(false);
-    const [showNotificationPanel, setShowNotificationPanel] = useState(false);
+    const [showBurgerMenu, setShowBurgerMenu] = useState(false);
+
+    // Activity log: accumulates unique sensor readings (detected by created_at change)
+    const [activityLog, setActivityLog] = useState([]);
+    const lastCreatedAtRef = useRef(latestReading?.created_at ?? null);
     const previousIssueRef = useRef(initialHasSensorIssue);
 
     const fetchLatestData = useCallback(async (forceFresh = false) => {
@@ -67,6 +74,15 @@ export default function Dashboard() {
 
         if (json.data) {
             setSensorData(json.data);
+
+            // Append to activity log only when created_at changes (new unique reading)
+            if (json.data.created_at && json.data.created_at !== lastCreatedAtRef.current) {
+                lastCreatedAtRef.current = json.data.created_at;
+                setActivityLog((prev) => {
+                    const next = [json.data, ...prev];
+                    return next.slice(0, MAX_LOG_ENTRIES);
+                });
+            }
         }
 
         if (json.sensor_status) {
@@ -80,7 +96,6 @@ export default function Dashboard() {
         setIsReloadingSensors(true);
 
         try {
-            // Thorough check: perform 3 uncached reads with short delays.
             for (let attempt = 0; attempt < 3; attempt += 1) {
                 const json = await fetchLatestData(true);
                 const status = json?.sensor_status;
@@ -113,10 +128,7 @@ export default function Dashboard() {
             }
         };
 
-        // Fetch immediately on load
         fetchData();
-        
-        // Then poll every 1.5 seconds for near real-time updates
         const interval = setInterval(fetchData, 1500);
         return () => clearInterval(interval);
     }, [fetchLatestData]);
@@ -188,7 +200,6 @@ export default function Dashboard() {
     const uvNotification = getUvNotification();
 
     useEffect(() => {
-        // Auto-open modal when a new issue appears; auto-hide when all sensors recover.
         if (hasSensorIssue && !previousIssueRef.current) {
             setShowSensorModal(true);
         }
@@ -207,7 +218,9 @@ export default function Dashboard() {
                     ? 'bg-gradient-to-br from-[#0a0e27] via-[#111638] to-[#0d1229]'
                     : 'bg-gradient-to-br from-[#f8fbff] via-[#eef4ff] to-[#e8f1ff]'
             }`}>
+                {/* ── HEADER ── */}
                 <header className="px-3 sm:px-6 py-3 sm:py-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    {/* Logo */}
                     <div className="flex items-center gap-3">
                         <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center ${isNightMode ? 'border-purple-400/50' : 'border-indigo-300/70 bg-white/80'}`}>
                             <svg className={`w-5 h-5 ${isNightMode ? 'text-purple-400' : 'text-indigo-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -224,74 +237,43 @@ export default function Dashboard() {
                         </div>
                     </div>
 
-                    <div className="relative flex w-full items-center justify-between gap-2 md:w-auto md:justify-end md:gap-4">
-                        <div className="flex items-center gap-2 self-center">
-                            {/* History link */}
-                            <Link
-                                href="/history"
-                                className={`h-10 inline-flex items-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition-colors ${isNightMode
-                                    ? 'border-white/15 bg-white/5 text-gray-200 hover:bg-white/10'
-                                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                                }`}
-                                title="Daily History"
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <span className="hidden sm:inline">History</span>
-                            </Link>
-
-                            <button
-                                onClick={() => setShowNotificationPanel((prev) => !prev)}
-                                className={`h-10 inline-flex items-center justify-center rounded-lg border px-3 transition-colors ${isNightMode
-                                    ? 'border-white/15 bg-white/5 text-gray-200 hover:bg-white/10'
-                                    : 'border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
-                                }`}
-                                title="Notifications"
-                            >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-                                </svg>
-                                <span className={`ml-2 inline-block h-2.5 w-2.5 rounded-full ${uvNotification.dot}`} />
-                            </button>
-
-                        {hasSensorIssue && (
-                            <button
-                                onClick={() => setShowSensorModal(true)}
-                                className={`h-10 inline-flex items-center gap-2 rounded-lg border px-2.5 sm:px-3 text-[11px] sm:text-xs font-semibold transition-colors ${isNightMode
-                                    ? 'border-amber-400/40 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20'
-                                    : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
-                                }`}
-                                title="Sensor alerts"
-                            >
-                                <span className={`inline-block h-2 w-2 rounded-full animate-pulse ${isNightMode ? 'bg-amber-300' : 'bg-amber-500'}`} />
-                                <span className="hidden sm:inline">Sensor Warning</span>
-                                <span className="sm:hidden">Warning</span>
-                            </button>
-                        )}
-                        <button
-                            onClick={() => setShowSettings(true)}
-                            className={`h-10 w-10 inline-flex items-center justify-center rounded-lg transition-colors ${isNightMode ? 'hover:bg-white/10 text-gray-400 hover:text-white' : 'hover:bg-slate-200/70 text-slate-500 hover:text-slate-900'}`}
-                            title="Settings"
-                        >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                                    d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </button>
-                        </div>
+                    {/* Right side controls */}
+                    <div className="relative flex w-full items-center justify-between gap-2 md:w-auto md:justify-end md:gap-3">
                         <PhilippineClock isNightMode={isNightMode} />
 
-                        {showNotificationPanel && (
-                            <div className={`absolute right-0 top-12 z-40 w-[min(92vw,320px)] rounded-xl border p-4 shadow-xl ${isNightMode ? 'border-white/15 bg-[#101634]' : 'border-slate-200 bg-white'}`}>
-                                <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${isNightMode ? 'text-gray-400' : 'text-slate-500'}`}>UV Notification</p>
-                                <div className={`rounded-lg border px-3 py-2 text-sm ${uvNotification.chip}`}>
-                                    <p className="font-semibold">{uvNotification.title}</p>
-                                    <p className={`mt-1 ${isNightMode ? 'text-gray-200' : 'text-slate-700'}`}>{uvNotification.message}</p>
-                                </div>
-                            </div>
-                        )}
+                        <div className="flex items-center gap-2">
+                            {/* Sensor Warning — stays in header */}
+                            {hasSensorIssue && (
+                                <button
+                                    onClick={() => setShowSensorModal(true)}
+                                    className={`h-10 inline-flex items-center gap-2 rounded-lg border px-2.5 sm:px-3 text-[11px] sm:text-xs font-semibold transition-colors ${isNightMode
+                                        ? 'border-amber-400/40 bg-amber-500/10 text-amber-200 hover:bg-amber-500/20'
+                                        : 'border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100'
+                                    }`}
+                                    title="Sensor alerts"
+                                >
+                                    <span className={`inline-block h-2 w-2 rounded-full animate-pulse ${isNightMode ? 'bg-amber-300' : 'bg-amber-500'}`} />
+                                    <span className="hidden sm:inline">Sensor Warning</span>
+                                    <span className="sm:hidden">Warning</span>
+                                </button>
+                            )}
+
+                            {/* Burger menu button */}
+                            <button
+                                id="burger-menu-btn"
+                                onClick={() => setShowBurgerMenu(true)}
+                                className={`h-10 w-10 inline-flex flex-col items-center justify-center gap-1.5 rounded-lg transition-colors ${isNightMode
+                                    ? 'hover:bg-white/10 text-gray-300'
+                                    : 'hover:bg-slate-200/70 text-slate-600'
+                                }`}
+                                title="Menu"
+                                aria-label="Open menu"
+                            >
+                                <span className={`block w-5 h-0.5 rounded-full ${isNightMode ? 'bg-gray-300' : 'bg-slate-600'}`} />
+                                <span className={`block w-5 h-0.5 rounded-full ${isNightMode ? 'bg-gray-300' : 'bg-slate-600'}`} />
+                                <span className={`block w-5 h-0.5 rounded-full ${isNightMode ? 'bg-gray-300' : 'bg-slate-600'}`} />
+                            </button>
+                        </div>
                     </div>
                 </header>
 
@@ -341,6 +323,19 @@ export default function Dashboard() {
                     <SafetyTips isNightMode={isNightMode} />
                 </div>
 
+                {/* ── Burger Menu Drawer ── */}
+                <BurgerMenu
+                    open={showBurgerMenu}
+                    onClose={() => setShowBurgerMenu(false)}
+                    isNightMode={isNightMode}
+                    uvNotification={uvNotification}
+                    tempUnit={tempUnit}
+                    activityLog={activityLog}
+                    manualNightMode={manualNightMode}
+                    onSettingsSave={handleSettingsSave}
+                />
+
+                {/* Settings Modal (kept for compat but triggered only from BurgerMenu now via handleSettingsSave) */}
                 {showSettings && (
                     <SettingsModal
                         manualNightMode={manualNightMode}

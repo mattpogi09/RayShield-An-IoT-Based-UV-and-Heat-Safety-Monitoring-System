@@ -208,21 +208,18 @@ export default function UVDetailModal({ uva, uvb, uvIndex, onClose, isNightMode 
                             </div>
                             <p className={`text-[11px] mb-2 ${d ? 'text-gray-400' : 'text-slate-500'}`}>Long-wave (315–400nm) · Penetrates deep into skin</p>
 
-                            {/* Single-colour fill bar — colour follows UV Index level */}
-                            <div className={`relative w-full rounded-full h-2.5 overflow-hidden ${d ? 'bg-white/10' : 'bg-slate-200'}`}>
-                                <div
-                                    className="h-full rounded-full transition-all duration-500"
-                                    style={{ width: `${uvaPercent}%`, backgroundColor: uvIndexLevel.barColor, opacity: 0.85 }}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between mt-1">
-                                <span className={`text-[10px] ${d ? 'text-gray-500' : 'text-slate-400'}`}>0</span>
-                                <span className={`font-bold text-base tabular-nums ${d ? 'text-white' : 'text-slate-900'}`}>
+                            {/* Bar + inline value */}
+                            <div className="flex items-center gap-3">
+                                <div className={`flex-1 rounded-full h-2.5 overflow-hidden ${d ? 'bg-white/10' : 'bg-slate-200'}`}>
+                                    <div
+                                        className="h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${uvaPercent}%`, backgroundColor: uvIndexLevel.barColor, opacity: 0.85 }}
+                                    />
+                                </div>
+                                <span className={`font-bold text-base tabular-nums whitespace-nowrap ${d ? 'text-white' : 'text-slate-900'}`}>
                                     {typeof uva === 'number' ? uva.toFixed(1) : '0.0'}
-                                    <span className={`text-xs font-normal ml-1 ${d ? 'text-gray-400' : 'text-slate-500'}`}>raw μW/cm²</span>
+                                    <span className={`text-xs font-normal ml-1 ${d ? 'text-gray-400' : 'text-slate-500'}`}>raw</span>
                                 </span>
-                                <span className={`text-[10px] ${d ? 'text-gray-500' : 'text-slate-400'}`}>300</span>
                             </div>
 
                             <div className={`mt-2 text-[11px] space-y-0.5 ${d ? 'text-gray-500' : 'text-slate-500'}`}>
@@ -247,21 +244,18 @@ export default function UVDetailModal({ uva, uvb, uvIndex, onClose, isNightMode 
                             </div>
                             <p className={`text-[11px] mb-2 ${d ? 'text-gray-400' : 'text-slate-500'}`}>Short-wave (280–315nm) · Burns skin surface</p>
 
-                            {/* Single-colour fill bar — colour follows UV Index level */}
-                            <div className={`relative w-full rounded-full h-2.5 overflow-hidden ${d ? 'bg-white/10' : 'bg-slate-200'}`}>
-                                <div
-                                    className="h-full rounded-full transition-all duration-500"
-                                    style={{ width: `${uvbPercent}%`, backgroundColor: uvIndexLevel.barColor, opacity: 0.85 }}
-                                />
-                            </div>
-
-                            <div className="flex items-center justify-between mt-1">
-                                <span className={`text-[10px] ${d ? 'text-gray-500' : 'text-slate-400'}`}>0</span>
-                                <span className={`font-bold text-base tabular-nums ${d ? 'text-white' : 'text-slate-900'}`}>
+                            {/* Bar + inline value */}
+                            <div className="flex items-center gap-3">
+                                <div className={`flex-1 rounded-full h-2.5 overflow-hidden ${d ? 'bg-white/10' : 'bg-slate-200'}`}>
+                                    <div
+                                        className="h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${uvbPercent}%`, backgroundColor: uvIndexLevel.barColor, opacity: 0.85 }}
+                                    />
+                                </div>
+                                <span className={`font-bold text-base tabular-nums whitespace-nowrap ${d ? 'text-white' : 'text-slate-900'}`}>
                                     {typeof uvb === 'number' ? uvb.toFixed(1) : '0.0'}
-                                    <span className={`text-xs font-normal ml-1 ${d ? 'text-gray-400' : 'text-slate-500'}`}>raw μW/cm²</span>
+                                    <span className={`text-xs font-normal ml-1 ${d ? 'text-gray-400' : 'text-slate-500'}`}>raw</span>
                                 </span>
-                                <span className={`text-[10px] ${d ? 'text-gray-500' : 'text-slate-400'}`}>100</span>
                             </div>
 
                             <div className={`mt-2 text-[11px] space-y-0.5 ${d ? 'text-gray-500' : 'text-slate-500'}`}>

@@ -15,12 +15,12 @@ export default function UVDetailModal({ uva, uvb, uvIndex, onClose, isNightMode 
     const uvScaleTicks = [0, 2, 5, 7, 10, 13];
 
     const getUVIndexLevel = (index) => {
-        if (index >= 11) return { label: 'Extreme',   color: 'text-purple-400', bg: 'bg-purple-500/20 border-purple-400/40' };
-        if (index >= 8)  return { label: 'Very High', color: 'text-red-400',    bg: 'bg-red-500/20 border-red-400/40'       };
-        if (index >= 6)  return { label: 'High',      color: 'text-orange-400', bg: 'bg-orange-500/20 border-orange-400/40' };
-        if (index >= 3)  return { label: 'Moderate',  color: 'text-yellow-400', bg: 'bg-yellow-500/20 border-yellow-400/40' };
-        if (index > 0)   return { label: 'Low',       color: 'text-green-400',  bg: 'bg-green-500/20 border-green-400/40'   };
-        return                  { label: 'None',      color: 'text-gray-400',   bg: 'bg-gray-500/20 border-gray-400/30'     };
+        if (index >= 11) return { label: 'Extreme',   color: 'text-purple-400', bg: 'bg-purple-500/20 border-purple-400/40', barColor: '#9333ea' };
+        if (index >= 8)  return { label: 'Very High', color: 'text-red-400',    bg: 'bg-red-500/20 border-red-400/40',       barColor: '#ef4444' };
+        if (index >= 6)  return { label: 'High',      color: 'text-orange-400', bg: 'bg-orange-500/20 border-orange-400/40', barColor: '#f97316' };
+        if (index >= 3)  return { label: 'Moderate',  color: 'text-yellow-400', bg: 'bg-yellow-500/20 border-yellow-400/40', barColor: '#eab308' };
+        if (index > 0)   return { label: 'Low',       color: 'text-green-400',  bg: 'bg-green-500/20 border-green-400/40',   barColor: '#22c55e' };
+        return                  { label: 'None',      color: 'text-gray-400',   bg: 'bg-gray-500/20 border-gray-400/30',     barColor: '#64748b' };
     };
 
     const getUVALevel = (val) => {
@@ -208,24 +208,11 @@ export default function UVDetailModal({ uva, uvb, uvIndex, onClose, isNightMode 
                             </div>
                             <p className={`text-[11px] mb-2 ${d ? 'text-gray-400' : 'text-slate-500'}`}>Long-wave (315–400nm) · Penetrates deep into skin</p>
 
-                            {/* Segmented scale bar — same colour ramp as UV Index scale */}
-                            <div className="relative mb-1">
-                                <div className="flex rounded-full overflow-hidden h-2.5">
-                                    {uvScaleSegments.map((seg, i) => (
-                                        <div
-                                            key={i}
-                                            style={{
-                                                width: `${((seg.max - seg.min) / uvScaleMax) * 100}%`,
-                                                backgroundColor: seg.color,
-                                                opacity: 0.72,
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                                {/* Needle */}
+                            {/* Single-colour fill bar — colour follows UV Index level */}
+                            <div className={`relative w-full rounded-full h-2.5 overflow-hidden ${d ? 'bg-white/10' : 'bg-slate-200'}`}>
                                 <div
-                                    className={`absolute top-0 w-1 h-2.5 rounded-full transition-all duration-500 ${d ? 'bg-white shadow-lg shadow-white/40' : 'bg-slate-700 shadow shadow-slate-700/30'}`}
-                                    style={{ left: `calc(${uvaPercent}% - 2px)` }}
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${uvaPercent}%`, backgroundColor: uvIndexLevel.barColor, opacity: 0.85 }}
                                 />
                             </div>
 
@@ -260,24 +247,11 @@ export default function UVDetailModal({ uva, uvb, uvIndex, onClose, isNightMode 
                             </div>
                             <p className={`text-[11px] mb-2 ${d ? 'text-gray-400' : 'text-slate-500'}`}>Short-wave (280–315nm) · Burns skin surface</p>
 
-                            {/* Segmented scale bar — same colour ramp as UV Index scale */}
-                            <div className="relative mb-1">
-                                <div className="flex rounded-full overflow-hidden h-2.5">
-                                    {uvScaleSegments.map((seg, i) => (
-                                        <div
-                                            key={i}
-                                            style={{
-                                                width: `${((seg.max - seg.min) / uvScaleMax) * 100}%`,
-                                                backgroundColor: seg.color,
-                                                opacity: 0.72,
-                                            }}
-                                        />
-                                    ))}
-                                </div>
-                                {/* Needle */}
+                            {/* Single-colour fill bar — colour follows UV Index level */}
+                            <div className={`relative w-full rounded-full h-2.5 overflow-hidden ${d ? 'bg-white/10' : 'bg-slate-200'}`}>
                                 <div
-                                    className={`absolute top-0 w-1 h-2.5 rounded-full transition-all duration-500 ${d ? 'bg-white shadow-lg shadow-white/40' : 'bg-slate-700 shadow shadow-slate-700/30'}`}
-                                    style={{ left: `calc(${uvbPercent}% - 2px)` }}
+                                    className="h-full rounded-full transition-all duration-500"
+                                    style={{ width: `${uvbPercent}%`, backgroundColor: uvIndexLevel.barColor, opacity: 0.85 }}
                                 />
                             </div>
 

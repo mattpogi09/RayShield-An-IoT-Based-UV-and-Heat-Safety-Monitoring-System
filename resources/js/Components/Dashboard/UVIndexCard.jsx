@@ -127,7 +127,7 @@ export default function UVIndexCard({ uvIndex, isNightMode, onClickDetail }) {
 
     return (
         <div
-            className={`rounded-2xl p-6 h-full transition-all duration-500 ease-out cursor-pointer ${containerClass} ${isNightMode ? 'hover:border-white/35' : 'hover:border-slate-400/80 hover:shadow-lg'}`}
+            className={`rounded-2xl p-6 h-full transition-all duration-300 ease-out cursor-pointer group ${containerClass} ${isNightMode ? 'hover:border-white/60 hover:shadow-2xl hover:shadow-purple-900/60 hover:scale-[1.018]' : 'hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-200/70 hover:scale-[1.018]'}`}
             onClick={onClickDetail}
             onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {

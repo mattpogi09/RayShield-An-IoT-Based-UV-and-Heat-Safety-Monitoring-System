@@ -125,7 +125,11 @@ export default function HeatIndexCard({
 
     return (
         <div
-            className={`rounded-2xl p-6 transition-all duration-500 ease-out ${containerClass} ${onClickDetail ? `cursor-pointer ${isNightMode ? 'hover:border-white/30' : 'hover:border-slate-400/70 hover:shadow-lg'}` : ''}`}
+            className={`rounded-2xl p-6 transition-all duration-300 ease-out ${containerClass} ${onClickDetail ? `cursor-pointer group ${
+                isNightMode
+                    ? 'hover:border-white/60 hover:shadow-2xl hover:shadow-orange-900/50 hover:scale-[1.012]'
+                    : 'hover:border-orange-400 hover:shadow-xl hover:shadow-orange-200/60 hover:scale-[1.012]'
+            }` : ''}`}
             onClick={onClickDetail}
             onKeyDown={(e) => {
                 if (!onClickDetail) return;

@@ -164,53 +164,67 @@ export default function BurgerMenu({
                                 <p className={`text-xs ${muted}`}>Waiting for sensor data…</p>
                             </div>
                         ) : (
-                            <ul className="space-y-2 max-h-64 overflow-y-auto pr-1">
-                                {activityLog.map((entry, idx) => {
-                                    const uvInfo = uvLabel(entry.uv_index);
-                                    return (
-                                        <li
-                                            key={entry.created_at + idx}
-                                            className={`rounded-xl border px-3 py-2.5 text-xs ${cardBg}`}
-                                        >
-                                            {/* Time row */}
-                                            <div className="flex items-center justify-between mb-1.5">
-                                                <p className={`font-semibold tabular-nums ${muted}`}>
-                                                    {formatTime(entry.created_at)}
-                                                </p>
-                                                <span className={`flex items-center gap-1 font-bold ${uvInfo.color}`}>
-                                                    <span className={`w-1.5 h-1.5 rounded-full ${uvInfo.dot}`} />
-                                                    UV {entry.uv_index != null ? Number(entry.uv_index).toFixed(1) : '—'}
-                                                </span>
-                                            </div>
-                                            {/* Metrics row */}
-                                            <div className="flex gap-3 flex-wrap">
-                                                <span className={muted}>
-                                                    🌡{' '}
-                                                    <span className={text}>
-                                                        {tempUnit === 'fahrenheit'
-                                                            ? `${Number(entry.temperature_f ?? 0).toFixed(1)}°F`
-                                                            : `${Number(entry.temperature_c ?? 0).toFixed(1)}°C`}
+                            <>
+                                <ul className="space-y-2">
+                                    {activityLog.slice(0, 4).map((entry, idx) => {
+                                        const uvInfo = uvLabel(entry.uv_index);
+                                        return (
+                                            <li
+                                                key={entry.created_at + idx}
+                                                className={`rounded-xl border px-3 py-2.5 text-xs ${cardBg}`}
+                                            >
+                                                {/* Time row */}
+                                                <div className="flex items-center justify-between mb-1.5">
+                                                    <p className={`font-semibold tabular-nums ${muted}`}>
+                                                        {formatTime(entry.created_at)}
+                                                    </p>
+                                                    <span className={`flex items-center gap-1 font-bold ${uvInfo.color}`}>
+                                                        <span className={`w-1.5 h-1.5 rounded-full ${uvInfo.dot}`} />
+                                                        UV {entry.uv_index != null ? Number(entry.uv_index).toFixed(1) : '—'}
                                                     </span>
-                                                </span>
-                                                <span className={muted}>
-                                                    💧{' '}
-                                                    <span className={text}>
-                                                        {entry.humidity != null ? `${Number(entry.humidity).toFixed(0)}%` : '—'}
+                                                </div>
+                                                {/* Metrics row */}
+                                                <div className="flex gap-3 flex-wrap">
+                                                    <span className={muted}>
+                                                        🌡{' '}
+                                                        <span className={text}>
+                                                            {tempUnit === 'fahrenheit'
+                                                                ? `${Number(entry.temperature_f ?? 0).toFixed(1)}°F`
+                                                                : `${Number(entry.temperature_c ?? 0).toFixed(1)}°C`}
+                                                        </span>
                                                     </span>
-                                                </span>
-                                                <span className={muted}>
-                                                    🔥{' '}
-                                                    <span className={text}>
-                                                        {tempUnit === 'fahrenheit'
-                                                            ? `${Number(entry.heat_index_f ?? 0).toFixed(1)}°F`
-                                                            : `${Number(entry.heat_index_c ?? 0).toFixed(1)}°C`}
+                                                    <span className={muted}>
+                                                        💧{' '}
+                                                        <span className={text}>
+                                                            {entry.humidity != null ? `${Number(entry.humidity).toFixed(0)}%` : '—'}
+                                                        </span>
                                                     </span>
-                                                </span>
-                                            </div>
-                                        </li>
-                                    );
-                                })}
-                            </ul>
+                                                    <span className={muted}>
+                                                        🔥{' '}
+                                                        <span className={text}>
+                                                            {tempUnit === 'fahrenheit'
+                                                                ? `${Number(entry.heat_index_f ?? 0).toFixed(1)}°F`
+                                                                : `${Number(entry.heat_index_c ?? 0).toFixed(1)}°C`}
+                                                        </span>
+                                                    </span>
+                                                </div>
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+
+                                {/* View More button */}
+                                <Link
+                                    href="/activity-log"
+                                    onClick={onClose}
+                                    className={`mt-2 flex items-center justify-between rounded-xl border px-4 py-2.5 text-xs font-semibold transition-colors ${cardBg} ${hoverBg}`}
+                                >
+                                    <span>View All Activity Log</span>
+                                    <svg className={`w-3.5 h-3.5 ${muted}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </Link>
+                            </>
                         )}
                     </section>
 

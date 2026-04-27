@@ -69,11 +69,11 @@ export default function HeatIndexDetailModal({
                         <span className={`font-semibold ${isNightMode ? 'text-white' : 'text-slate-900'}`}>{typeof humidity === 'number' ? humidity.toFixed(1) : '0.0'}%</span>
                     </div>
                     <div className="flex items-center justify-between py-1">
-                        <span className={isNightMode ? 'text-gray-300' : 'text-slate-600'}>Feels-like delta (°C)</span>
+                        <span className={isNightMode ? 'text-gray-300' : 'text-slate-600'}>Feels-like (°C)</span>
                         <span className={`font-semibold ${isNightMode ? 'text-white' : 'text-slate-900'}`}>{`${diffC >= 0 ? '+' : ''}${diffC.toFixed(1)}`}</span>
                     </div>
                     <div className="flex items-center justify-between py-1">
-                        <span className={isNightMode ? 'text-gray-300' : 'text-slate-600'}>Feels-like delta (°F)</span>
+                        <span className={isNightMode ? 'text-gray-300' : 'text-slate-600'}>Feels-like (°F)</span>
                         <span className={`font-semibold ${isNightMode ? 'text-white' : 'text-slate-900'}`}>{`${diffF >= 0 ? '+' : ''}${diffF.toFixed(1)}`}</span>
                     </div>
                     <div className="flex items-center justify-between py-1">
